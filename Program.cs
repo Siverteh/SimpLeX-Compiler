@@ -1,7 +1,12 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -16,29 +21,47 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapPost("/compile", async (HttpRequest req) =>
+    {
+        using var reader = new StreamReader(req.Body);
+        var latexSource = await reader.ReadToEndAsync();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+        var tempDirPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDirPath);
+        var latexFilePath = Path.Combine(tempDirPath, "document.tex");
+        var pdfFilePath = Path.Combine(tempDirPath, "document.pdf");
+
+        await File.WriteAllTextAsync(latexFilePath, latexSource);
+
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "pdflatex",
+                Arguments = $"-interaction=nonstopmode -output-directory {tempDirPath} {latexFilePath}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = tempDirPath
+            }
+        };
+
+        process.Start();
+        await process.WaitForExitAsync();
+
+        if (File.Exists(pdfFilePath))
+        {
+            var fileBytes = await File.ReadAllBytesAsync(pdfFilePath);
+            return Results.File(fileBytes, "application/pdf", "compiled.pdf");
+        }
+        else
+        {
+            // Cleanup if failed
+            Directory.Delete(tempDirPath, true);
+            return Results.Problem("Failed to compile LaTeX document.");
+        }
+    })
+    .WithName("CompileLaTeX");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
