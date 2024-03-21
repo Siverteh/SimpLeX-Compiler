@@ -1,0 +1,6 @@
+@SimpLeX_Compiler_HostAddress = http://localhost:5148
+
+GET {{SimpLeX_Compiler_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
