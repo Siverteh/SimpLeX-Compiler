@@ -21,5 +21,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "SimpLeX-Compiler.dll"]
