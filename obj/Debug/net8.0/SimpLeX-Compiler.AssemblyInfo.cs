@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SimpLeX-Compiler")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f8cd5fe5e2fc61e1b27be0e745341d86666a4fb2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4c4f5ad2ccc5055ce84cfdf57a2311cf6a9d2bb4")]
 [assembly: System.Reflection.AssemblyProductAttribute("SimpLeX-Compiler")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SimpLeX-Compiler")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

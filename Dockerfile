@@ -15,9 +15,13 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-# Install pdflatex (this might require additional LaTeX packages based on your needs)
+# Install pdflatex with additional packages including biblatex
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends texlive-latex-base \
+    && apt-get install -y --no-install-recommends \
+       texlive-latex-extra \
+       texlive-fonts-recommended \
+       texlive-bibtex-extra \
+       biber \
     && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
